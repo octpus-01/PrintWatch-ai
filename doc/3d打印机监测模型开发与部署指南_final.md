@@ -427,3 +427,24 @@ dvc push
 [29]:http://news.10jqka.com.cn/20251127/c672778799.shtml "中科君达视界突破DIC效率瓶颈：GPU并行计算实现数十倍加速"
 [30]:https://wap.ithome.com/html/866118.htm "MIT 团队推出首台芯片级 3D 打印机：比硬币还小，以纯光固化树脂技术实现手持打印 - IT之家"
 [31]:https://developer.aliyun.com/article/1684012 "71_数据版本控制：Git与DVC在LLM开发中的最佳实践-阿里云开发者社区"
+
+
+
+todo tree
+"todo-tree.general.tags": [
+    "TODO",
+    "FIXME",
+    "BUG",
+    "HACK",
+    "NOTE"
+],
+"todo-tree.filtering.excludeGlobs": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**"
+],
+"todo-tree.highlights.defaultHighlight": {
+    "type": "text",
+    "foreground": "#ff0000", 
+    "icon": "alert"
+},

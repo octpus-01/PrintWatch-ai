@@ -8,7 +8,7 @@ from PIL import Image
 import numpy as np
 
 # ====================== MQTT 配置 ======================
-MQTT_BROKER = "broker.emqx.io"  # 免费公共MQTT服务器（测试用）
+MQTT_BROKER = "broker.emqx.io"  
 MQTT_PORT = 1883
 MQTT_TOPIC = "rl/image/label"
 CLIENT_ID = "python_publisher"

@@ -12,3 +12,4 @@ wheels/
 # Workspace
 PrintWatch-ai.code-workspace
 
+test.py

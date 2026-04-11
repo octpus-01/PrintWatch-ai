@@ -2,7 +2,8 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**PrintWatch AI** is an intelligent monitoring system designed to detect common defects in Fused Deposition Modeling (FDM) 3D prints in real-time. By leveraging computer vision and deep learning on a Raspberry Pi, it aims to save time, filament, and prevent failed prints before they happen.
+**PrintWatch AI** is an intelligent monitoring system designed to detect common defects in Fused Deposition Modeling (FDM) 3D prints in real-time. By leveraging computer vision and deep learning on a Raspberry Pi, it aims to save time and filament. 
+**THIS PROJECT IS UNDER CONSTRUCTION!**
 
 ## 📌 Problem Statement
 
@@ -12,8 +13,8 @@
 
 This project provides an end-to-end solution:
 1.  **Capture**: A camera module (e.g., Raspberry Pi Camera) continuously monitors the printing process.
-2.  **Detect**: A lightweight YOLO (You Only Look Once) model, trained on a custom dataset of 3D printing defects, runs directly on the Raspberry Pi for on-device inference.
-3.  **Alert & Log**: When a defect is detected, the system can send an alert (e.g., via MQTT) and log the image with its annotation for further analysis.
+2.  **Detect**: A lightweight model, trained on a custom dataset of 3D printing defects, runs directly on the Raspberry Pi for on-device inference.
+3.  **Alert & Log**: When a defect is detected, the system can send an alert via MQTT and log the image with its annotation for further analysis and reinforce learning.
 
 ## 🛠️ Tech Stack
 
@@ -32,32 +33,33 @@ This project provides an end-to-end solution:
 
 1.  A Raspberry Pi (4 or 5 recommended) with Raspberry Pi OS installed.
 2.  A camera module connected and enabled (`sudo raspi-config`).
-3.  An MQTT Broker (e.g., Mosquitto) running on your local network or a cloud service.
+3.  An MQTT Broker (e.g.Mosquitto) running on your local network or a cloud service.
+4.  A powerful computer to finetune the models.
 
 ### Installation
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/printwatch-ai.git
-    cd printwatch-ai
+    git clone https://github.com/octpus-01/PrintWatch-ai.git
+    cd PrintWatch-ai
     ```
 
-2.  **Set up a virtual environment (recommended):**
+2.  **Set up a virtual environment ( uv recommended):**
     ```bash
-    python3 -m venv venv
+    uv venv
     source venv/bin/activate # On Windows: venv\Scripts\activate
     ```
 
 3.  **Install dependencies:**
     ```bash
-    pip install -r requirements.txt
+    uv pip install -r requirements.txt
     ```
 
 ### Usage
 
-1.  **(Optional) Train your model:** Place your dataset in the `data/` folder and follow the YOLO training instructions.
+1.  **(Optional) Train your model:** Place your dataset in the `data/finetune` folder and follow the YOLO training instructions.
 2.  **Configure the scripts:** Update `publisher.py` and `detect.py` with your MQTT broker's IP address, port, and topic.
-3.  **Run the detection script on your Raspberry Pi:**
+3.  **Run the detection script on your Raspberry Pi: NOT FINISHED YET**
     ```bash
     python src/detect.py --weights models/best.pt --source 0 # '0' for default camera
     ```

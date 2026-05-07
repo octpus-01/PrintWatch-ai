@@ -14,3 +14,7 @@ PrintWatch-ai.code-workspace
 
 test.py
 Todo.json
+
+data/
+runs/
+checkpoints/

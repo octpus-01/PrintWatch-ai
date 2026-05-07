@@ -609,7 +609,7 @@ class SwinTransformerBlock(nn.Module):
 # VMamba相关组件
 class VSSBlock(nn.Module):
     def __init__(self, hidden_dim: int = 0, drop_path: float = 0, norm_layer: nn.Module = nn.LayerNorm, 
-                 ssm_d_state: int = 64, ssm_ratio: float = 1.0, ssm_dt_rank: Any = "auto", ssm_act_layer=nn.SiLU,
+                 ssm_d_state: int = 64, ssm_ratio: float = 1.0, ssm_dt_rank: any = "auto", ssm_act_layer=nn.SiLU,
                  ssm_conv: int = 3, ssm_conv_bias=True, forward_type="v0"):
         super().__init__()
         self.norm = norm_layer(hidden_dim)

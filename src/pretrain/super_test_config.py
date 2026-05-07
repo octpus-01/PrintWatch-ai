@@ -1,5 +1,5 @@
 # config.py
-#TODO:Just TRAIN THEM!
+
 from super_test_models import (
     get_yolov26_nano, get_faster_net_p2, get_convnext_tiny_yolo26, 
     get_pp_lcnet_picodet, get_repvgg_yolov6s, get_vmamba_detect, 
@@ -12,7 +12,7 @@ from super_test_models import (
 # 全局训练配置
 TRAIN_CONFIG = {
     "device": "cuda",
-    "epochs": 15,
+    "epochs": 7,
     "base_batch_size": 32,      # RTX 2070S 8GB 显存的安全值（开启混合精度后可适当调大）
     "num_workers": 0,
     "pin_memory": True,

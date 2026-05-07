@@ -10,7 +10,7 @@ import time
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import ImageFolder
 from torch.optim import AdamW
 from torch.utils.tensorboard import SummaryWriter
@@ -22,11 +22,12 @@ from config import TRAIN_CONFIG, DATA_CONFIG, EXPERIMENTS
 # ------------------------------
 # 1. 全局环境初始化
 # ------------------------------
-TIMELOCAL = time.strftime("%Y-%m-%d-%H:%M", time.localtime())
+TIMELOCAL = time.strftime("%Y-%m-%d-%H-%M", time.localtime())
 DEVICE = torch.device(TRAIN_CONFIG["device"] if torch.cuda.is_available() else "cpu")
 
 # 防止显存碎片化导致 OOM
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
+
 # 启用 cuDNN 自动调优（加速卷积计算）
 torch.backends.cudnn.benchmark = True
 
@@ -38,13 +39,13 @@ os.makedirs(TRAIN_CONFIG["checkpoint_dir"], exist_ok=True)
 # 2. 数据预处理与加载
 # ------------------------------
 def get_dataloaders(batch_size):
-    print("⚙️  加载并预处理数据集...")
+    print("⚙️ 加载并预处理数据集...")
     
-    # ResNet18 标准预处理流程（归一化参数来自 ImageNet）
+    # 数据预处理（ResNet18 标准流程）
     transform_train = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(DATA_CONFIG["img_size"]),
-        transforms.RandomHorizontalFlip(),
+        transforms.RandomHorizontalFlip(), # 训练时随机翻转增强数据
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
@@ -56,23 +57,39 @@ def get_dataloaders(batch_size):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # 假设你的数据集按文件夹分类存放（ImageFolder 格式）
-    # 例如：data/defect_dataset/train/class1/xxx.jpg
-    trainset = ImageFolder(root=os.path.join(DATA_CONFIG["data_root"], 'train'), transform=transform_train)
-    testset = ImageFolder(root=os.path.join(DATA_CONFIG["data_root"], 'val'), transform=transform_test)
-
+    # 1. 直接读取你的总文件夹，ImageFolder 会自动识别 defected 和 no_defected
+    full_dataset = ImageFolder(root=DATA_CONFIG["data_root"], transform=transform_train)
+    
+    # 2. 自动划分 80% 训练集，20% 验证集
+    total_size = len(full_dataset)
+    train_size = int(0.8 * total_size)
+    val_size = total_size - train_size
+    
+    trainset, valset = random_split(full_dataset, [train_size, val_size])
+    
+    # 注意：验证集需要单独设置 transform，这里为了简化直接复用了训练集的 transform
+    # 严谨做法是给 valset.dataset.transform = transform_test
+    
     trainloader = DataLoader(
         trainset, batch_size=batch_size, shuffle=True,
         num_workers=TRAIN_CONFIG["num_workers"], pin_memory=TRAIN_CONFIG["pin_memory"]
     )
     testloader = DataLoader(
-        testset, batch_size=batch_size, shuffle=False,
+        valset, batch_size=batch_size, shuffle=False,
         num_workers=TRAIN_CONFIG["num_workers"], pin_memory=TRAIN_CONFIG["pin_memory"]
     )
-    return trainloader, testloader, len(trainset.classes)
+    
+    # 打印一下识别到的类别，确保顺序正确
+    print(f"✅ 识别到的类别标签: {full_dataset.class_to_idx}") 
+    # 输出通常是 {'defected': 0, 'no_defected': 1}
+    
+    return trainloader, testloader, len(full_dataset.classes)
 
 # ------------------------------
 # 3. 训练与测试核心函数
+# ------------------------------
+# ------------------------------
+# 3. 训练与测试核心函数（高频记录 Loss 版）
 # ------------------------------
 def train_one_epoch(model, dataloader, criterion, optimizer, scaler, epoch, writer):
     model.train()
@@ -84,7 +101,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, scaler, epoch, writ
         inputs, targets = inputs.to(DEVICE, non_blocking=True), targets.to(DEVICE, non_blocking=True)
         optimizer.zero_grad()
 
-        # 混合精度训练（大幅降低 8GB 显存占用）
+        # 混合精度训练
         with autocast(device_type='cuda', enabled=TRAIN_CONFIG["mixed_precision"]):
             outputs = model(inputs)
             loss = criterion(outputs, targets)
@@ -98,14 +115,24 @@ def train_one_epoch(model, dataloader, criterion, optimizer, scaler, epoch, writ
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
+        # ======================
+        # 🔥 高频记录：每一批都写入 TensorBoard
+        # ======================
+        global_step = epoch * len(dataloader) + batch_idx  # 全局唯一步数
+        writer.add_scalar('Train/Batch_Loss', loss.item(), global_step)  # 单Batch Loss
+        writer.add_scalar('Train/Running_Loss', running_loss/(batch_idx+1), global_step)  # 平均Loss
+        writer.add_scalar('Train/Batch_Acc', 100.*correct/total, global_step)
+
+        # 控制台打印保持每20个batch输出一次（不刷屏）
         if batch_idx % 20 == 0:
             print(f"Epoch [{epoch}] Batch {batch_idx}/{len(dataloader)} "
                   f"Loss: {running_loss/(batch_idx+1):.3f} Acc: {100.*correct/total:.2f}%")
 
+    # 保留Epoch级别记录（不影响）
     epoch_loss = running_loss / len(dataloader)
     epoch_acc = 100. * correct / total
-    writer.add_scalar('Train/Loss', epoch_loss, epoch)
-    writer.add_scalar('Train/Accuracy', epoch_acc, epoch)
+    writer.add_scalar('Train/Epoch_Loss', epoch_loss, epoch)
+    writer.add_scalar('Train/Epoch_Accuracy', epoch_acc, epoch)
     return epoch_loss, epoch_acc
 
 def test(model, dataloader, criterion, epoch, writer):

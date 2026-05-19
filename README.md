@@ -1,6 +1,7 @@
 # PrintWatch AI: Real-time 3D Printing Defect Detection
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![wakatime](https://wakatime.com/badge/user/06e56467-701d-4a24-b8e2-7866e9d233cb/project/f110eaa4-3fe3-4e64-bdcc-14139194a119.svg)](https://wakatime.com/badge/user/06e56467-701d-4a24-b8e2-7866e9d233cb/project/f110eaa4-3fe3-4e64-bdcc-14139194a119)
 
 **PrintWatch AI** is an intelligent monitoring system designed to detect common defects in Fused Deposition Modeling (FDM) 3D prints in real-time. By leveraging computer vision and deep learning on a Raspberry Pi, it aims to save time and filament. 
 **THIS PROJECT IS UNDER CONSTRUCTION!**

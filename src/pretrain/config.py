@@ -4,7 +4,7 @@ from models import get_resnet18
 TRAIN_CONFIG = {
     "device": "cuda",
     "epochs": 10,
-    "base_batch_size": 64,  
+    "base_batch_size": 32,  
     "num_workers": 0,
     "persistent_workers": False,            # ✅ Windows 必须 0，否则卡死
     "pin_memory": False,         # ✅ 必须关，否则爆显存

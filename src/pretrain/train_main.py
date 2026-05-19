@@ -17,8 +17,12 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.amp import autocast, GradScaler
 import gc
 
+import torch.multiprocessing as mp
+
 from config import TRAIN_CONFIG, DATA_CONFIG, EXPERIMENTS
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True  # 强制加载损坏图片，永不报错
 # ------------------------------
 # 1. 全局环境初始化
 # ------------------------------
@@ -40,7 +44,7 @@ os.makedirs(TRAIN_CONFIG["checkpoint_dir"], exist_ok=True)
 # ------------------------------
 def get_dataloaders(batch_size):
     print("⚙️ 加载并预处理数据集...")
-    
+    '''  
     # 数据预处理（ResNet18 标准流程）
     transform_train = transforms.Compose([
         transforms.Resize(256),
@@ -56,6 +60,20 @@ def get_dataloaders(batch_size):
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
+    '''
+    transform_train = transforms.Compose([
+        transforms.Resize(DATA_CONFIG["img_size"]),  # 直接缩放，不裁剪
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.Resize(DATA_CONFIG["img_size"]),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
 
     # 1. 直接读取你的总文件夹，ImageFolder 会自动识别 defected 和 no_defected
     full_dataset = ImageFolder(root=DATA_CONFIG["data_root"], transform=transform_train)
@@ -66,9 +84,8 @@ def get_dataloaders(batch_size):
     val_size = total_size - train_size
     
     trainset, valset = random_split(full_dataset, [train_size, val_size])
-    
-    # 注意：验证集需要单独设置 transform，这里为了简化直接复用了训练集的 transform
-    # 严谨做法是给 valset.dataset.transform = transform_test
+    valset.dataset.transform = transform_test
+
     
     trainloader = DataLoader(
         trainset, batch_size=batch_size, shuffle=True,
@@ -89,7 +106,7 @@ def get_dataloaders(batch_size):
 # 3. 训练与测试核心函数
 # ------------------------------
 # ------------------------------
-# 3. 训练与测试核心函数（高频记录 Loss 版）
+# 3. 训练与测试核心函数
 # ------------------------------
 def train_one_epoch(model, dataloader, criterion, optimizer, scaler, epoch, writer):
     model.train()
@@ -209,6 +226,8 @@ if __name__ == "__main__":
     print(f"🖥️  当前设备: {DEVICE}")
     print(f"⚡ 混合精度: {'ON' if TRAIN_CONFIG['mixed_precision'] else 'OFF'}\n")
 
+    mp.set_start_method("spawn", force=True)
+    mp.set_sharing_strategy('file_system')
     # 遍历配置中的所有实验
     for exp in EXPERIMENTS:
         try:

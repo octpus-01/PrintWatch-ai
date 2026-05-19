@@ -25,7 +25,7 @@ TRAIN_CONFIG = {
 
 # 数据预处理与路径配置
 DATA_CONFIG = {
-    "data_root": "./data/raw/defect_data",  # 替换为你实际的 3D 打印缺陷数据集路径
+    "data_root": "D:\downloads\k\Kaggle_3D_Print_Defect_Dataset",  # 替换为你实际的 3D 打印缺陷数据集路径
     "img_size": 224,                       # 标准输入尺寸
     "num_classes": 5,                     # 你的缺陷类别数量
 }

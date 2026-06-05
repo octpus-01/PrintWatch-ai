@@ -403,8 +403,8 @@ class Attention2d(nn.Module):
                 idxs.append(attention_offsets[offset])
         self.attention_biases = nn.Parameter(torch.zeros(num_heads, len(attention_offsets)))
         self.register_buffer('attention_bias_idxs', torch.LongTensor(idxs).view(N, N))
-        
-    @torch.no_grad__()
+
+    
     def train(self, mode=True):
         super().train(mode)
         if mode and hasattr(self, 'ab'):
@@ -1270,3 +1270,4 @@ def get_resnet18_simam(num_classes=10, pretrained=False):
             return x
 
     return ResNet18SimAM(num_classes)
+

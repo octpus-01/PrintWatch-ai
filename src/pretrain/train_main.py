@@ -19,7 +19,7 @@ import gc
 
 import torch.multiprocessing as mp
 
-from config import TRAIN_CONFIG, DATA_CONFIG, EXPERIMENTS
+from test_config import TRAIN_CONFIG, DATA_CONFIG, EXPERIMENTS
 
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True  # 强制加载损坏图片，永不报错

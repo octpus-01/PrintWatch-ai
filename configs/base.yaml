@@ -1,0 +1,31 @@
+device: cpu
+amp: false
+
+data:
+  root: C:\Users\PATAT\Downloads\Kaggle_3D_Print_Defect_Dataset
+  index_csv: data/pretrain_index.csv
+  img_size: 224
+  num_classes: 6
+  num_workers: 2
+
+train:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  smoke: false
+
+search:
+  smoke: false
+  n_candidates: 300
+  eval_workers: 4
+  cuda_mps: false
+
+model:
+  family: ghostnet
+  pretrained: true
+
+logging:
+  level: INFO
+  log_dir: ./runs
+  checkpoint_dir: ./checkpoints

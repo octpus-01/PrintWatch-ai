@@ -45,10 +45,25 @@ This project provides an end-to-end solution:
     cd PrintWatch-ai
     ```
 
-2.  **Set up a virtual environment ( uv recommended):**
+2.  **Set up a virtual environment (Python 3.12 required):**
+    
+    This project requires **Python 3.12** for compatibility with PyTorch and other dependencies.
+    
+    **Using uv (recommended):**
     ```bash
-    uv venv
+    uv venv --python 3.12
     source venv/bin/activate # On Windows: venv\Scripts\activate
+    ```
+    
+    **Using venv (alternative):**
+    ```bash
+    # On Windows:
+    py -3.12 -m venv .venv
+    .venv\Scripts\activate
+    
+    # On Linux/Mac:
+    python3.12 -m venv .venv
+    source .venv/bin/activate
     ```
 
 3.  **Install dependencies:**
